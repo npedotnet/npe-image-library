@@ -1,7 +1,7 @@
 # npe-image-library
 An additional image library for graphics programming in Java.
 
-**Under construction.**
+See [npe-image-library wiki](https://github.com/npedotnet/npe-image-library/wiki) for more information.
 
 ##Features
 
