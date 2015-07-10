@@ -15,7 +15,9 @@
 
 package net.npe.image.psd;
 
-import net.npe.core.ByteArrayReader;
+import java.io.IOException;
+
+import net.npe.io.InputReader;
 
 public class PsdChannel {
 	
@@ -29,12 +31,12 @@ public class PsdChannel {
 	
 	public PsdChannel() {}
 	
-	public void readInformation(ByteArrayReader reader) {
+	public void readInformation(InputReader reader) throws IOException {
 		type = reader.readShort();
 		length = reader.readInt();
 	}
 	
-	public void read(ByteArrayReader reader, int width, int height) {
+	public void read(InputReader reader, int width, int height) throws IOException {
 		int compression = reader.readShort();
 		switch(compression) {
 		case 0: // raw

@@ -29,6 +29,33 @@ import net.npe.image.tga.TgaImage;
  */
 public class ImageReader {
 	
+	public static boolean supports(String path) {
+		return getImageType(path) != null;
+	}
+	
+	public static ImageType getImageType(String path) {
+		String lower = path.toLowerCase();
+		if(lower.endsWith(".dds")) return ImageType.DDS;
+		else if(lower.endsWith(".psd")) return ImageType.PSD;
+		else if(lower.endsWith(".tga")) return ImageType.TGA;
+		return null;
+	}
+	
+	/*
+	public static PixelImage read(ImageType type, PixelFormat format, InputReader reader) throws IOException {
+		switch(type) {
+		case PSD:
+			PsdImage psdImage = new PsdImage();
+			psdImage.read(reader, false);
+			return psdImage;
+		case DDS: // Not yet implemented
+		case TGA: // Not yet implemented
+		default:
+			throw new IOException("No Support ImageType:"+type.toString());
+		}
+	}
+	*/
+	
 	/**
 	 * create a PixelImage instance from buffer with pixel format.
 	 * @param type image type
@@ -59,6 +86,7 @@ public class ImageReader {
 	
 	/**
 	 * create a PixelImage instance from InputStream with pixel format.
+	 * DDS/TGA is not yet implemented.
 	 * @param type image type
 	 * @param format pixel format
 	 * @param is InputStream
@@ -66,7 +94,21 @@ public class ImageReader {
 	 * @throws IOException throws IOException
 	 */
 	public static PixelImage read(ImageType type, PixelFormat format, InputStream is) throws IOException {
+		switch(type) {
+		case PSD:
+			PsdImage psdImage = new PsdImage();
+			psdImage.read(is, format, false);
+			return psdImage;
+		case DDS: // Not yet implemented
+		case TGA: // Not yet implemented
+		default:
+			throw new IOException("No Support ImageType:"+type.toString());
+		}
+	}
+	
+	public static PixelImage readFast(ImageType type, PixelFormat format, InputStream is) throws IOException {
 		byte [] buffer = new byte[is.available()];
+		is.read(buffer);
 		return read(type, format, buffer, 0);
 	}
 	

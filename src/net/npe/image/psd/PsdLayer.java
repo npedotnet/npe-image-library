@@ -15,7 +15,9 @@
 
 package net.npe.image.psd;
 
-import net.npe.core.ByteArrayReader;
+import java.io.IOException;
+
+import net.npe.io.InputReader;
 import net.npe.image.PixelFormat;
 import net.npe.image.PixelImage;
 
@@ -27,7 +29,7 @@ public class PsdLayer {
 	public PsdLayer() {
 	}
 	
-	public void readRecords(ByteArrayReader reader) {
+	public void readRecords(InputReader reader) throws IOException {
 		
 		top = reader.readInt();
 		left = reader.readInt();
@@ -84,6 +86,7 @@ public class PsdLayer {
 		reader.skip(layerBlendingLength);
 		
 		// Layer name(Pascal String), padded to a multiple of 4 bytes.
+		/* old.ver
 		int position = reader.getPosition();
 		int layerNameLength = reader.readByte() & 0xFF;
 		name = reader.readString(layerNameLength);
@@ -91,6 +94,15 @@ public class PsdLayer {
 		
 		position += 4*((1+layerNameLength+3)/4);
 		reader.setPosition(position);
+		*/
+		reader.mark();
+		int layerNameLength = reader.readByte() & 0xFF;
+		name = reader.readString(layerNameLength);
+		System.out.println("LayerName["+layerNameLength+"]:"+name);
+		
+		int skipByte = 4*((1+layerNameLength+3)/4);
+		reader.reset();
+		reader.skip(skipByte);
 		
 		// Additional Layer Information
 		int sigunature = reader.readInt();
@@ -117,14 +129,12 @@ public class PsdLayer {
 		
 	}
 	
-	public void readChannelImageData(ByteArrayReader reader) {
-		
+	public void readChannelImageData(InputReader reader) throws IOException {
 		int width = getWidth();
 		int height = getHeight();
 		for(int i=0; i<channels.length; i++) {
 			channels[i].read(reader, width, height);
 		}
-		
 	}
 	
 	public int getTop() { return top; }

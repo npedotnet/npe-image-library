@@ -16,8 +16,11 @@
 package net.npe.image.psd;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import net.npe.core.ByteArrayReader;
+import net.npe.io.ByteArrayReader;
+import net.npe.io.InputReader;
+import net.npe.io.StreamReader;
 import net.npe.image.PixelFormat;
 import net.npe.image.PixelImage;
 
@@ -31,7 +34,21 @@ public class PsdImage extends PixelImage {
 	
 	public void read(byte [] buffer, int offset, PixelFormat format, boolean creatingLayers) throws IOException {
 		
-		ByteArrayReader reader = new ByteArrayReader(buffer, offset, ByteArrayReader.BigEndian);
+		ByteArrayReader reader = new ByteArrayReader(buffer, offset, InputReader.BigEndian);
+		
+		read(reader, format, creatingLayers);
+		
+	}
+	
+	public void read(InputStream is, PixelFormat format, boolean creatingLayers) throws IOException {
+		
+		StreamReader reader = new StreamReader(is, InputReader.BigEndian);
+		
+		read(reader, format, creatingLayers);
+		
+	}
+	
+	public void read(InputReader reader, PixelFormat format, boolean creatingLayers) throws IOException {
 		
 		// sigunature '8BPS'
 		sigunature = reader.readInt();
@@ -144,6 +161,8 @@ public class PsdImage extends PixelImage {
 			}
 			
 		}
+		
+		this.format = format;
 		
 	}
 	

@@ -15,17 +15,19 @@
 
 package net.npe.image.psd;
 
-import net.npe.core.ByteArrayReader;
+import java.io.IOException;
+
+import net.npe.io.InputReader;
 
 public class PsdDecorder {
 	
-	static void readRaw(ByteArrayReader reader, byte [] outBuffer) {
+	static void readRaw(InputReader reader, byte [] outBuffer) throws IOException {
 		for(int i=0; i<outBuffer.length; i++) {
 			outBuffer[i] = reader.readByte();
 		}
 	}
 	
-	static void decodeRunLengthEncoding(ByteArrayReader reader, byte [] outBuffer) {
+	static void decodeRunLengthEncoding(InputReader reader, byte [] outBuffer) throws IOException {
 		for(int i=0; i<outBuffer.length; ) {
 			byte packet = reader.readByte();
 			if((packet & 0x80) != 0) {

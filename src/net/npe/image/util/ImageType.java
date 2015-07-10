@@ -33,4 +33,5 @@ public enum ImageType {
 	WEBP,
 	XCF,
 	*/
+	
 }
