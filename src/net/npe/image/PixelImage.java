@@ -56,27 +56,62 @@ public class PixelImage {
 	public PixelFormat getFormat() { return format; }
 	
 	/**
-	 * change format (not yet implemented)
+	 * change format
 	 * @param format pixel format
 	 */
 	public void changeFormat(PixelFormat format) {
-		// TODO implementation
+		if(this.format != format) {
+			for(int i=0; i<width*height; i++) {
+				int red = this.format.getRed(pixels[i]);
+				int green = this.format.getGreen(pixels[i]);
+				int blue = this.format.getBlue(pixels[i]);
+				int alpha = this.format.getAlpha(pixels[i]);
+				pixels[i] = format.getPixel(red, green, blue, alpha);
+			}
+			this.format = format;
+		}
 	}
 
 	/**
-	 * multiply alpha (not yet implemented)
+	 * multiply alpha
 	 * @param alpha alpha is 0.0 to 1.0
 	 */
 	public void multiplyAlpha(float alpha) {
-		// TODO implementation
+		int rgbMask = ~format.getAlphaMask();
+		for(int i=0; i<width*height; i++) {
+			int a = (int)(255 * alpha * (format.getAlpha(pixels[i]) / 255.f));
+			pixels[i] = (pixels[i] & rgbMask) | (a << format.getAlphaShift());
+		}
 	}
 	
 	/**
-	 * multiply alpha (not yet implemented)
+	 * multiply alpha
 	 * @param alpha alpha is 0 to 255
 	 */
 	public void multiplyAlpha(int alpha) {
 		multiplyAlpha(alpha / 255.f);
+	}
+	
+	/**
+	 * set alpha
+	 * @param alpha alpha is 0 to 255
+	 */
+	public void setAlpha(int alpha) {
+		int rgbMask = ~format.getAlphaMask();
+		for(int i=0; i<width*height; i++) {
+			pixels[i] = (pixels[i] & rgbMask) | (alpha << format.getAlphaShift());
+		}
+	}
+	
+	/**
+	 * remove transparency.
+	 */
+	public void removeTransparency() {
+		int alphaMask = format.getAlphaMask();
+		int rgbMask = ~alphaMask;
+		for(int i=0; i<width*height; i++) {
+			pixels[i] = (pixels[i] & rgbMask) | alphaMask;
+		}
 	}
 	
 	protected PixelImage() {
