@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="npe-image-library" default="jars" basedir=".">
+<project name="npe-image-library" default="all" basedir=".">
 	
 	<!-- User settings -->
-	<property name="android.sdk.jar" value="C:\Users\chappy\AppData\Local\Android\android-sdk\platforms\android-21\android.jar"/>
-	<property name="jre7.rt.jar" value="C:\Program Files\Java\jre7\lib\rt.jar"/>
+	<property name="android.sdk.jar" value="C:/Users/chappy/AppData/Local/Android/android-sdk/platforms/android-21/android.jar"/>
+	<property name="jre7.rt.jar" value="C:/Program Files/Java/jre7/lib/rt.jar"/>
+	<property name="gwt.user.jar" value="E:/eclipse/plugins/gwt-2.7.0/gwt-2.7.0/gwt-user.jar"/>
 	<!-- End of user settings -->
 	
 	<property name="src" value="../src"/>
@@ -19,7 +20,11 @@
 	<property name="android.dest" value="${android.src}"/>
 	<property name="android.jarfile" value="${dest}/${ant.project.name}-android-${version}.jar"/>
 	
-	<target name="jars" depends="common.jar,android.jar"/>
+	<property name="gwt.src" value="${dest}/gwt"/>
+	<property name="gwt.dest" value="${gwt.src}"/>
+	<property name="gwt.jarfile" value="${dest}/${ant.project.name}-gwt-${version}.jar"/>
+	
+	<target name="all" depends="common.jar,android.jar,gwt.jar"/>
 	
 	<target name="common.jar" depends="common.compile">
 		<jar jarfile="${common.jarfile}" basedir="${common.dest}"/>
@@ -35,6 +40,8 @@
 			<fileset dir="${src}"/>
 		</copy>
 		<delete dir="${common.src}/net/npe/image/util/android"/>
+		<delete dir="${common.src}/net/npe/image/util/gwt"/>
+		<delete file="${common.src}/net/npe/image.gwt.xml"/>
 	</target>
 	
 	<target name="android.jar" depends="android.compile">
@@ -50,6 +57,24 @@
 		<copy todir="${android.src}">
 			<fileset dir="${src}"/>
 		</copy>
+		<delete dir="${android.src}/net/npe/image/util/gwt"/>
+		<delete file="${android.src}/net/npe/image.gwt.xml"/>
+	</target>
+	
+	<target name="gwt.jar" depends="gwt.compile">
+		<jar jarfile="${gwt.jarfile}" basedir="${gwt.dest}"/>
+	</target>
+	
+	<target name="gwt.compile" depends="gwt.preprocess">
+		<javac srcdir="${gwt.src}" destdir="${gwt.dest}" classpath="${gwt.user.jar}" includeantruntime="false"/>
+	</target>
+	
+	<target name="gwt.preprocess">
+		<mkdir dir="${gwt.src}"/>
+		<copy todir="${gwt.src}">
+			<fileset dir="${src}"/>
+		</copy>
+		<delete dir="${gwt.src}/net/npe/image/util/android"/>
 	</target>
 	
 	<target name="clean">
