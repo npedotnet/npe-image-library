@@ -36,7 +36,7 @@
 #include "net/npe/image/util/ImageType.h"
 #include "net/npe/image/util/ImageWriter.h"
 
-inline void npeInitializeImageLibrary() {
+static inline void npeInitializeImageLibrary() {
   NetNpeImagePixelFormat_initialize();
   NetNpeImagePixelImage_initialize();
   NetNpeImageDdsDdsImage_initialize();
