@@ -26,7 +26,7 @@ https://github.com/npedotnet/npedotnet.github.io/tree/master/archives
 |all|npe-image-library-1.0.jar|
 |android|npe-image-library-android-1.0.jar|
 |gwt|npe-image-library-gwt-1.0.jar|
-|ios|not yet support|
+|ios|npe-image-library-ios-1.0.zip|
 
 ##License
 
