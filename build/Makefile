@@ -80,6 +80,7 @@ $(PACKAGE): $(LIB_FAT)
 	rm -rf $(subst $(OBJC_SOURCE_DIR),$(PACKAGE_DIR)/include,$(OBJC_SOURCES))
 	cp ../objc/npeimage.h $(PACKAGE_DIR)/include
 	cp $(LIB_FAT) $(PACKAGE_DIR)/lib
+	cp -r ../objc/util $(PACKAGE_DIR)
 #	mkdir -p $(PACKAGE_DIR)/NPEImage.framework/Versions/A/Headers
 #	cp -r $(PACKAGE_DIR)/include/* $(PACKAGE_DIR)/NPEImage.framework/Versions/A/Headers
 #	cp -r $(LIB_FAT) $(PACKAGE_DIR)/NPEImage.framework/Versions/A/NPEImage
