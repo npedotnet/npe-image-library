@@ -21,11 +21,12 @@
 + (NetNpeImagePixelImage *)read:(NSString *)path;
 + (NetNpeImagePixelImage *)read:(NSString *)path withFormat:(NetNpeImagePixelFormat *)format;
 
-+ (NetNpeImagePixelImage *)createPixelImage:(UIImage *)image;
++ (NetNpeImagePixelImage *)createPixelImage:(UIImage *)image; /* Not yet implemented */
 
 + (UIImage *)createUIImage:(NSString *)path;
 + (UIImage *)createUIImageFromPixelImage:(NetNpeImagePixelImage *)image;
-+ (CGImageRef)createCGImage:(NetNpeImagePixelImage *)image;
++ (CGImageRef)createCGImage:(NSString *)path;
++ (CGImageRef)createCGImageFromPixelImage:(NetNpeImagePixelImage *)image;
 
 + (void *)allocateMemory:(size_t)size;
 + (void)freeMemory:(void *)memory;

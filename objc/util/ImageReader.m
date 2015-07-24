@@ -77,10 +77,23 @@
 }
 
 + (UIImage *)createUIImageFromPixelImage:(NetNpeImagePixelImage *)image {
-    return [UIImage imageWithCGImage:[self createCGImage:image]];
+    return [UIImage imageWithCGImage:[self createCGImageFromPixelImage:image]];
 }
 
-+ (CGImageRef)createCGImage:(NetNpeImagePixelImage *)image {
++ (CGImageRef)createCGImage:(NSString *)path {
+    
+    NetNpeImageUtilImageTypeEnum *type = [NetNpeImageUtilImageReader getImageTypeWithNSString:path];
+    
+    if(type != NULL) {
+        NetNpeImagePixelImage *image = [self read:path];
+        return [self createCGImageFromPixelImage:image];
+    }
+    
+    return [[UIImage imageWithContentsOfFile:path] CGImage];
+    
+}
+
++ (CGImageRef)createCGImageFromPixelImage:(NetNpeImagePixelImage *)image {
     
     [image changeFormatWithNetNpeImagePixelFormat:NetNpeImagePixelFormat_ABGR_];
     
