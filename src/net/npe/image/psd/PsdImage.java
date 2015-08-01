@@ -73,8 +73,6 @@ public class PsdImage extends PixelImage {
 		// Depth: the number of bits per channel. Supported values are 1, 8, 16 and 32.
 		depth = reader.readShort();
 		
-		System.out.println("w:"+width+", h:"+height+", d:"+depth);
-		
 		// The color mode of the file.
 		colorMode = PsdColorMode.values()[reader.readShort()];
 		
@@ -83,8 +81,13 @@ public class PsdImage extends PixelImage {
 		// ColorModeDataSection
 		int colorModeDataSectionLength = reader.readInt();
 		
-		// skip ColorModeDataSection
-		reader.skip(colorModeDataSectionLength);
+		// ColorModeDataSection
+		if(0 < colorModeDataSectionLength) {
+			colorModeData = new byte[colorModeDataSectionLength];
+			for(int i=0; i<colorModeDataSectionLength; i++) {
+				colorModeData[i] = (byte)reader.read();
+			}
+		}
 		
 		// ImageResourcesSection
 		int imageResourcesSectionLength = reader.readInt();
@@ -127,7 +130,8 @@ public class PsdImage extends PixelImage {
 		}
 
 		// result data
-			
+		this.format = format;
+
 		// compression method
 		int compression = reader.readShort();
 
@@ -135,34 +139,14 @@ public class PsdImage extends PixelImage {
 			reader.skip(2*height*channels);
 			pixels = new int[width*height];
 			
-			byte [] outBuffer = new byte[width];
-			int [] SHIFTS = {
-				format.getRedShift(),
-				format.getGreenShift(),
-				format.getBlueShift(),
-				format.getAlphaShift()
-			};
-			
-			for(int i=0; i<channels; i++) {
-				for(int j=0; j<height; j++) {
-					PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
-					for(int k=0; k<width; k++) {
-						pixels[j*width+k] |= (outBuffer[k] & 0xFF) << SHIFTS[i];
-					}
-				}
-			}
-
-			// fill alpha 0xFF
-			if(channels == 3) {
-				int alpha = 0xFF << format.getAlphaShift();
-				for(int i=0; i<pixels.length; i++) {
-					pixels[i] |= alpha;
-				}
+			switch(colorMode) {
+			case GRAYSCALE: readGrayscale(reader); break;
+			case INDEXED: readIndexed(reader); break;
+			case RGB: readRgb(reader); break;
+			default: throw new IOException("Unsupport color mode:"+colorMode);
 			}
 			
 		}
-		
-		this.format = format;
 		
 	}
 	
@@ -190,11 +174,125 @@ public class PsdImage extends PixelImage {
 		return layers;
 	}
 	
+	private void readRgb(InputReader reader) throws IOException {
+		
+		byte [] outBuffer = new byte[width];
+		
+		int [] SHIFTS = {
+			format.getRedShift(),
+			format.getGreenShift(),
+			format.getBlueShift(),
+			format.getAlphaShift()
+		};
+		
+		for(int i=0; i<channels; i++) {
+			for(int j=0; j<height; j++) {
+				PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
+				for(int k=0; k<width; k++) {
+					pixels[j*width+k] |= (outBuffer[k] & 0xFF) << SHIFTS[i];
+				}
+			}
+		}
+
+		// fill alpha 0xFF
+		if(channels == 3) {
+			int alpha = 0xFF << format.getAlphaShift();
+			for(int i=0; i<pixels.length; i++) {
+				pixels[i] |= alpha;
+			}
+		}
+
+	}
+	
+	private void readGrayscale(InputReader reader) throws IOException {
+		
+		byte [] outBuffer = new byte[width];
+		
+		int [] SHIFTS = {
+			format.getRedShift(),
+			format.getGreenShift(),
+			format.getBlueShift(),
+			format.getAlphaShift()
+		};
+		
+		// rgb
+		for(int i=0; i<height; i++) {
+			PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
+			for(int j=0; j<width; j++) {
+				pixels[i*width+j] =
+						((outBuffer[j] & 0xFF) << SHIFTS[0]) |
+						((outBuffer[j] & 0xFF) << SHIFTS[1]) |
+						((outBuffer[j] & 0xFF) << SHIFTS[2]);
+			}
+		}
+		
+		// alpha
+		if(channels > 1) {
+			for(int i=0; i<height; i++) {
+				PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
+				for(int j=0; j<width; j++) {
+					pixels[i*width+j] |= (0xFF << SHIFTS[3]);
+				}
+			}
+		}
+		else {
+			// fill 0xFF
+			int alpha = 0xFF << format.getAlphaShift();
+			for(int i=0; i<pixels.length; i++) {
+				pixels[i] |= alpha;
+			}
+		}
+		
+	}
+	
+	private void readIndexed(InputReader reader) throws IOException {
+		
+		byte [] outBuffer = new byte[width];
+		
+		int [] SHIFTS = {
+			format.getRedShift(),
+			format.getGreenShift(),
+			format.getBlueShift(),
+			format.getAlphaShift()
+		};
+		
+		// rgb
+		for(int i=0; i<height; i++) {
+			PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
+			for(int j=0; j<width; j++) {
+				int index = (outBuffer[j] & 0xFF);
+				pixels[i*width+j] =
+						((colorModeData[index] & 0xFF) << SHIFTS[0]) |
+						((colorModeData[index+256] & 0xFF) << SHIFTS[1]) |
+						((colorModeData[index+512] & 0xFF) << SHIFTS[2]);
+			}
+		}
+
+		// alpha
+		if(channels > 1) {
+			for(int i=0; i<height; i++) {
+				PsdDecorder.decodeRunLengthEncoding(reader, outBuffer);
+				for(int j=0; j<width; j++) {
+					pixels[i*width+j] |= (0xFF << SHIFTS[3]);
+				}
+			}
+		}
+		else {
+			// fill 0xFF
+			int alpha = 0xFF << format.getAlphaShift();
+			for(int i=0; i<pixels.length; i++) {
+				pixels[i] |= alpha;
+			}
+		}
+
+	}
+	
 	private int sigunature;
 	private int version;
 	private int channels;
 	private int depth;
 	private PsdColorMode colorMode;
+	private byte [] colorModeData;
 	private PsdLayer [] layers;
 
 }
